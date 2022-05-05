@@ -1,7 +1,9 @@
-import { useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 const useSearchParams = () => {
-  const [searchParams] = useState(new URLSearchParams(window.location.search))
+  const searchParams = useMemo(() => {
+    return new URLSearchParams(location.search)
+  }, [location.search])
 
   return [searchParams]
 }
@@ -11,6 +13,7 @@ function App() {
   const [name, setName] = useState(searchParams.get("name") || "")
   const [age, setAge] = useState(searchParams.get("age") || "")
   const [linkArr, setLinkArr] = useState<string[]>([])
+
   return (
     <div className="App">
       <h1>Search</h1>
