@@ -19,19 +19,20 @@ function SearchParams() {
   const [name, setName] = useState(searchParams.get("name") || "")
   const [age, setAge] = useState(searchParams.get("age") || "")
   const [linkArr, setLinkArr] = useState<string[]>([])
+  const [isSync, setIsSync] = useState(true)
 
   return (
     <div className="component">
-      {/* TODO: 需要套个节流函数 */}
       <h2>Search</h2>
+      <div>当前同步状态: {isSync ? "同步" : "非同步"}</div>
       <div>
         Name:{" "}
         <input
           type="text"
           value={name}
-          onChange={(e) => {
-            setName(e.target.value)
-            setSearchParams(`age=${age}&name=${name}`)
+          onChange={({ target: { value: newName } }) => {
+            setName(newName)
+            isSync && setSearchParams(`age=${age}&name=${newName}`)
           }}
         />
       </div>
@@ -40,14 +41,14 @@ function SearchParams() {
         <input
           type="text"
           value={age}
-          onChange={(e) => {
-            setAge(e.target.value)
-            setSearchParams(`age=${age}&name=${name}`)
+          onChange={({ target: { value: newAge } }) => {
+            setAge(newAge)
+            isSync && setSearchParams(`age=${newAge}&name=${name}`)
           }}
         />
       </div>
       <button onClick={() => setLinkArr(linkArr.concat(`?age=${age}&name=${name}`))}>save link</button>
-      <button onClick={() => setSearchParams(`age=${age}&name=${name}`)}>setSearchParams</button>
+      <button onClick={() => setIsSync(!isSync)}>{isSync ? "Close" : "Open"} Sync</button>
       <ul>
         {linkArr.map((link) => (
           <li key={link}>
