@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@ppzp/noty': ^0.0.5
   '@types/react': ^18.0.0
   '@types/react-dom': ^18.0.0
   '@vitejs/plugin-react': ^1.3.0
@@ -12,6 +13,7 @@ specifiers:
   vite: ^2.9.7
 
 dependencies:
+  '@ppzp/noty': 0.0.5
   react: 18.1.0
   react-dom: 18.1.0_react@18.1.0
   react-router-dom: 6.3.0_ef5jwxihqo6n7gxfmzogljlgcm
@@ -324,6 +326,10 @@ packages:
       '@jridgewell/resolve-uri': 3.0.6
       '@jridgewell/sourcemap-codec': 1.4.12
     dev: true
+
+  /@ppzp/noty/0.0.5:
+    resolution: {integrity: sha512-auoLnATsFtdeBywXlHHJrcPhv4reSPuyXhOqExRc/8uxbSp+++b1VfoUDQwoCufQvdTtkRxjaDYFvgX6QJft/g==}
+    dev: false
 
   /@rollup/pluginutils/4.2.1:
     resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}

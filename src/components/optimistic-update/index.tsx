@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useAsync, useAsyncRetry } from "react-use"
+import noty from "@ppzp/noty" // 引入默认配置（动画、内容）的通知
 
 interface Task {
   name: number
@@ -21,51 +22,113 @@ const dbTasks: Task[] = [
   },
 ]
 
+const mockError = {
+  canFetchTasks: false,
+  canUpdateTask: true,
+}
+
 const fetchTasks = () =>
   new Promise<Task[]>((resolve, reject) => {
     setTimeout(() => {
-      resolve(dbTasks)
-      // reject(new Error("this is Error"))
+      if (!mockError.canFetchTasks) {
+        reject(new Error("fetchTasks 服务器异常"))
+      }
+      // 简单实现深拷贝
+      resolve(JSON.parse(JSON.stringify(dbTasks)))
     }, 2000)
   })
 
 const updateTask = (newTask: Task) =>
-  new Promise((resolve) => {
+  new Promise((resolve, reject) => {
     setTimeout(() => {
+      if (!mockError.canUpdateTask) {
+        reject(new Error("updateTask 服务器异常"))
+        return
+      }
       const findInDbTask = dbTasks.find((dbTask) => dbTask.name === newTask.name)
       if (!findInDbTask) {
         return
       }
       findInDbTask.done = newTask.done
       resolve("done")
-    }, 200)
+    }, 1000)
   })
 
 function OptimisticUpdate() {
-  const { value: tasks, loading, error, retry } = useAsyncRetry(fetchTasks)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const doFetchTasks = () => {
+    setLoading(true)
+    return fetchTasks()
+      .then(setTasks, (reason) => noty.error(reason))
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  const doUpdateTask = (newTask: Task) => {
+    setLoading(true)
+    return updateTask(newTask)
+      .catch((reason) => noty.error(reason))
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    doFetchTasks()
+  }, [])
+
+  const [mockErrorState, setMockErrorState] = useState(mockError)
 
   return (
-    <ul>
-      {loading
-        ? "loading"
-        : error
-        ? error.message
-        : tasks?.map((task) => (
-            <li key={task.name}>
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => {
-                  updateTask({
-                    ...task,
-                    done: !task.done,
-                  }).then(retry)
-                }}
-              />{" "}
-              {task.name}
-            </li>
-          ))}
-    </ul>
+    <div>
+      <div>
+        canFetchTasks:{" "}
+        <input
+          type="checkbox"
+          checked={mockErrorState.canFetchTasks}
+          onChange={() => {
+            mockError.canFetchTasks = !mockError.canFetchTasks
+            setMockErrorState({ ...mockError })
+          }}
+        />
+      </div>
+
+      <div>
+        canUpdateTask:{" "}
+        <input
+          type="checkbox"
+          checked={mockErrorState.canUpdateTask}
+          onChange={() => {
+            mockError.canUpdateTask = !mockError.canUpdateTask
+            setMockErrorState({ ...mockError })
+          }}
+        />
+      </div>
+      <button onClick={doFetchTasks}>retry</button>
+      <hr />
+      <ul>
+        {loading
+          ? "loading"
+          : tasks.map((task) => (
+              <li key={task.name}>
+                <input
+                  type="checkbox"
+                  checked={task.done}
+                  onChange={() => {
+                    doUpdateTask({
+                      ...task,
+                      done: !task.done,
+                    }).then(doFetchTasks)
+                  }}
+                />{" "}
+                {task.name}
+              </li>
+            ))}
+      </ul>
+    </div>
   )
 }
 
