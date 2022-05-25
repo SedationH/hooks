@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useAsync, useAsyncRetry } from "react-use"
 import noty from "@ppzp/noty" // 引入默认配置（动画、内容）的通知
 
@@ -23,9 +23,11 @@ const dbTasks: Task[] = [
 ]
 
 const mockError = {
-  canFetchTasks: false,
+  canFetchTasks: true,
   canUpdateTask: true,
 }
+
+const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 const fetchTasks = () =>
   new Promise<Task[]>((resolve, reject) => {
@@ -34,7 +36,7 @@ const fetchTasks = () =>
         reject(new Error("fetchTasks 服务器异常"))
       }
       // 简单实现深拷贝
-      resolve(JSON.parse(JSON.stringify(dbTasks)))
+      resolve(deepClone(dbTasks))
     }, 2000)
   })
 
@@ -57,6 +59,7 @@ const updateTask = (newTask: Task) =>
 function OptimisticUpdate() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(false)
+  const [useOptimisticUpdate, setUseOptimisticUpdate] = useState(false)
 
   const doFetchTasks = () => {
     setLoading(true)
@@ -74,6 +77,28 @@ function OptimisticUpdate() {
       .finally(() => {
         setLoading(false)
       })
+  }
+
+  const prevTasks = useRef(tasks)
+
+  const doOptimisticUpdate = (newTask: Task) => {
+    // 保存上一次的状态，用于失败的时候进行重置
+    prevTasks.current = tasks
+    const temp = deepClone(tasks)
+    const idx = temp.findIndex((task) => task.name === newTask.name)
+    if (idx === -1) {
+      return
+    }
+    temp[idx] = newTask
+    // 假设成功 修改State
+    setTasks(temp)
+
+    // 请求服务器进行更新
+    return updateTask(newTask).catch((reason) => {
+      // 如果失败 进行状态重置
+      noty.error(reason)
+      setTasks(prevTasks.current)
+    })
   }
 
   useEffect(() => {
@@ -107,7 +132,18 @@ function OptimisticUpdate() {
           }}
         />
       </div>
-      <button onClick={doFetchTasks}>retry</button>
+
+      <div>
+        useOptimisticUpdate:{" "}
+        <input
+          type="checkbox"
+          checked={useOptimisticUpdate}
+          onChange={() => {
+            setUseOptimisticUpdate(!useOptimisticUpdate)
+          }}
+        />
+      </div>
+      <button onClick={doFetchTasks}>FetchTasks</button>
       <hr />
       <ul>
         {loading
@@ -118,6 +154,13 @@ function OptimisticUpdate() {
                   type="checkbox"
                   checked={task.done}
                   onChange={() => {
+                    if (useOptimisticUpdate) {
+                      doOptimisticUpdate({
+                        ...task,
+                        done: !task.done,
+                      })
+                      return
+                    }
                     doUpdateTask({
                       ...task,
                       done: !task.done,
