@@ -1,7 +1,8 @@
 import TheReactCounter from "../../src/pages/The-React-Counter"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, renderHook, act } from "@testing-library/react"
+import { useCounter } from "../../src/hooks/useCounter"
 
-describe("useCounter.test", () => {
+describe("useCounter user view", () => {
   it("able to increment and decrement", async () => {
     render(<TheReactCounter />)
 
@@ -21,5 +22,21 @@ describe("useCounter.test", () => {
     await screen.findByText("clicked: 1")
     fireEvent.click(decrementButton)
     await screen.findByText("clicked: 0")
+  })
+})
+
+describe("useCounter developer view", () => {
+  it("able to increment and decrement", async () => {
+    const result = renderHook(() => useCounter())
+    expect(result.result.current.cnt).toBe(0)
+    act(() => {
+      result.result.current.decrement()
+    })
+    expect(result.result.current.cnt).toBe(-1)
+
+    act(() => {
+      result.result.current.increment()
+    })
+    expect(result.result.current.cnt).toBe(0)
   })
 })
