@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import noty from "@ppzp/noty" // 引入默认配置（动画、内容）的通知
+import useSWR, { useSWRConfig } from "swr"
 
 interface Task {
   name: number
@@ -30,6 +31,7 @@ const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 const fetchTasks = () =>
   new Promise<Task[]>((resolve, reject) => {
+    console.log("sedationh Server get request\n", "fetchTasks")
     setTimeout(() => {
       if (!mockError.canFetchTasks) {
         reject(new Error("fetchTasks 服务器异常"))
@@ -41,6 +43,7 @@ const fetchTasks = () =>
 
 const updateTask = (newTask: Task) =>
   new Promise((resolve, reject) => {
+    console.log("sedationh Server get request\n", "updateTask")
     setTimeout(() => {
       if (!mockError.canUpdateTask) {
         reject(new Error("updateTask 服务器异常"))
@@ -55,56 +58,11 @@ const updateTask = (newTask: Task) =>
     }, 1000)
   })
 
-function OptimisticUpdate() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [loading, setLoading] = useState(false)
-  const [useOptimisticUpdate, setUseOptimisticUpdate] = useState(false)
-
-  const doFetchTasks = () => {
-    setLoading(true)
-    return fetchTasks()
-      .then(setTasks, (reason) => noty.error(reason))
-      .finally(() => {
-        setLoading(false)
-      })
-  }
-
-  const doUpdateTask = (newTask: Task) => {
-    setLoading(true)
-    return updateTask(newTask)
-      .catch((reason) => noty.error(reason))
-      .finally(() => {
-        setLoading(false)
-      })
-  }
-
-  const prevTasks = useRef(tasks)
-
-  const doOptimisticUpdate = (newTask: Task) => {
-    // 保存上一次的状态，用于失败的时候进行重置
-    prevTasks.current = tasks
-    const temp = deepClone(tasks)
-    const idx = temp.findIndex((task) => task.name === newTask.name)
-    if (idx === -1) {
-      return
-    }
-    temp[idx] = newTask
-    // 假设成功 修改State
-    setTasks(temp)
-
-    // 请求服务器进行更新
-    return updateTask(newTask).catch((reason) => {
-      // 如果失败 进行状态重置
-      noty.error(reason)
-      setTasks(prevTasks.current)
-    })
-  }
-
-  useEffect(() => {
-    doFetchTasks()
-  }, [])
-
+function SWR() {
   const [mockErrorState, setMockErrorState] = useState(mockError)
+  const { data: tasks, error } = useSWR("fetchTasks", fetchTasks)
+  const loading = !tasks && !error
+  const { mutate } = useSWRConfig()
 
   return (
     <div>
@@ -132,38 +90,41 @@ function OptimisticUpdate() {
         />
       </div>
 
-      <div>
-        useOptimisticUpdate:{" "}
-        <input
-          type="checkbox"
-          checked={useOptimisticUpdate}
-          onChange={() => {
-            setUseOptimisticUpdate(!useOptimisticUpdate)
-          }}
-        />
-      </div>
-      <button onClick={doFetchTasks}>FetchTasks</button>
+      {/* <button onClick={doFetchTasks}>FetchTasks</button> */}
       <hr />
       <ul>
         {loading
           ? "loading"
-          : tasks.map((task) => (
+          : tasks?.map((task) => (
               <li key={task.name}>
                 <input
                   type="checkbox"
                   checked={task.done}
                   onChange={() => {
-                    if (useOptimisticUpdate) {
-                      doOptimisticUpdate({
-                        ...task,
-                        done: !task.done,
-                      })
-                      return
-                    }
-                    doUpdateTask({
+                    const newTask = {
                       ...task,
                       done: !task.done,
-                    }).then(doFetchTasks)
+                    }
+                    const temp = deepClone(tasks)
+                    const idx = temp.findIndex((task) => task.name === newTask.name)
+                    if (idx === -1) {
+                      return
+                    }
+                    temp[idx] = newTask
+                    mutate(
+                      "fetchTasks",
+                      async () => {
+                        await updateTask(newTask).catch((reason) => {
+                          noty.error(reason)
+                          return Promise.reject(reason)
+                        })
+                        return temp
+                      },
+                      {
+                        rollbackOnError: true,
+                        optimisticData: temp,
+                      }
+                    ).catch()
                   }}
                 />{" "}
                 {task.name}
@@ -174,4 +135,4 @@ function OptimisticUpdate() {
   )
 }
 
-export default OptimisticUpdate
+export default SWR
