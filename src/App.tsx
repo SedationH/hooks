@@ -5,7 +5,6 @@ import routes from "~react-pages"
 
 function App() {
   const Routes = useRoutes(routes)
-  console.log("sedationh", routes)
 
   return (
     <div className="App">

@@ -1,18 +1,5 @@
-import { useMemo, useState } from "react"
-
-const useSearchParams = () => {
-  const searchParams = useMemo(() => {
-    return new URLSearchParams(window.location.search)
-  }, [location.search])
-
-  const setSearchParams = (nextInit: string) => {
-    const url = new URL("" + window.location) // toString
-    url.search = `?${nextInit}`
-    window.history.pushState({}, "", url)
-  }
-
-  return [searchParams, setSearchParams] as const
-}
+import { useState } from "react"
+import { useSearchParams } from "../../hooks/useSearchParams"
 
 function SearchParams() {
   const [searchParams, setSearchParams] = useSearchParams()
