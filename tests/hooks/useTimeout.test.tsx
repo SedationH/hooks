@@ -56,5 +56,3 @@ describe("DO NOT reset the timer if only callback changes", () => {
     expect(newFn).toHaveBeenCalledTimes(0)
   })
 })
-
-export {}
