@@ -8,8 +8,9 @@ export function useTimeout(callback: () => void, delay: number) {
   }, [callback])
 
   useEffect(() => {
-    const current = callbackRef.current
-    const timer = setTimeout(current, delay)
-    return () => clearTimeout(timer)
+    const timer = setTimeout(() => callbackRef.current(), delay)
+    return () => {
+      clearTimeout(timer)
+    }
   }, [delay])
 }
