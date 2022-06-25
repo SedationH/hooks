@@ -1,0 +1,26 @@
+// https://medium.com/claritydesignsystem/pure-css-accessible-checkboxes-and-radios-buttons-54063e759bb3
+
+.css-6 {
+  .my-checkbox {
+    position: relative;
+
+    // 利用 opacity 进行隐藏，又保留 可访问性
+    input[type="checkbox"] {
+      opacity: 0;
+      position: absolute;
+    }
+
+    span::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: gray;
+    }
+
+    input[type="checkbox"]:checked ~ span::before {
+      background-color: green;
+    }
+  }
+}
