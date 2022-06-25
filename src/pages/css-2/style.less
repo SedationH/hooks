@@ -1,0 +1,22 @@
+// https://designkojo.com/add-ellipse-truncated-text-css-single-line-and-multi-line-options#:~:text=Single%2Dline%20Truncate,in%20most%20use%20cases%20anyhow
+
+.css-2 {
+  width: 100px;
+
+  .one-line {
+    /* 设置文本强制在一行显示 */
+    white-space: nowrap;
+    /* 容器溢出隐藏 */
+    overflow: hidden;
+    /* 文本溢出显示省略号 */
+    text-overflow: ellipsis;
+  }
+
+  // https://stackoverflow.com/questions/3922739/limit-text-length-to-n-lines-using-css
+  .multi-line {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

@@ -2,9 +2,13 @@ nav {
   position: absolute;
   right: 20px;
   top: 20px;
+  z-index: 999;
 }
 
 nav > a {
   display: list-item;
 }
 
+.App {
+  height: 80vh;
+}

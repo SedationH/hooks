@@ -10,4 +10,7 @@ export default defineConfig({
       importMode: "sync",
     }),
   ],
+  server: {
+    port: 3001,
+  },
 })
