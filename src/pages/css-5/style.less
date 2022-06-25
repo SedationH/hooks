@@ -1,16 +1,33 @@
+// 启发点，从内到外完成需求 进行设计
 .css-5 {
   .modals {
+    position: fixed;
+    top: 30px;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .modal {
     width: 300px;
+    // req 1
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    // req 2
+    max-height: 300px;
   }
 
   .modal-header {
     background-color: #f44336;
+    flex: 0 0 50px;
   }
 
   .modal-body {
     background-color: #2973af;
+    flex: 1;
   }
 }
