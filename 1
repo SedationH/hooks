@@ -1,19 +1,6 @@
-.my-checkbox {
-  position: relative;
-}
-.my-checkbox input[type="checkbox"] {
-  opacity: 0;
-  width: 0;
-  margin: 0;
-}
-.my-checkbox span::before {
-  content: "";
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: gray;
-}
-.my-checkbox input[type="checkbox"]:checked ~ span::before {
-  background-color: red;
+.three-column-text {
+  columns: 3 auto;
+  column-rule: 1px solid #ddd;
+  column-gap: 20px;
+  padding: 10px;
 }

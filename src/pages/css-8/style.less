@@ -1,0 +1,54 @@
+// https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#syntax
+// .css-8 {
+.container {
+  display: flex;
+  height: 150px;
+  justify-content: center;
+  // background-color: red;
+
+  .left {
+    background-color: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex: 0 0 40px;
+  }
+
+  .middle {
+    background-color: #ddd;
+
+    width: 100%;
+    max-width: 240px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .right {
+    display: none;
+    background-color: #eee;
+    justify-content: center;
+    align-items: center;
+  }
+
+  // 40 + 240 + 120 === 400
+  // for 5 -> 400 + 20 === 420
+  @media screen and (min-width: 420px) {
+    & {
+      margin: 0 10px;
+    }
+
+    .right {
+      display: flex;
+      width: 120px;
+    }
+
+    .left {
+      flex-grow: 1;
+      max-width: 80px;
+    }
+  }
+}
+// }
